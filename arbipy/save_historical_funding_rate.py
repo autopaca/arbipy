@@ -6,11 +6,11 @@ import csv
 from pprint import pprint
 import functools
 from datetime import datetime, timedelta
-
-root = os.path.dirname(os.path.abspath(__file__))
-
 import ccxt.async_support as ccxt  # noqa: E402
 
+from utils import get_btcdom_index_info
+
+root = os.path.dirname(os.path.abspath(__file__))
 # ccxt unified symbol
 btcdom_symbol = "BTCDOM/USDT"
 btc_symbol = 'BTC/USDT'
@@ -64,21 +64,12 @@ async def run():
 
 def write_fr_csv(data, symbol):
     filename = symbol.replace('/', '_') + '_fr.csv'
-    filename = os.path.join(root, 'fr_data', filename)
+    filename = os.path.join(root, '../fr_data', filename)
     fr_header = ['timestamp', 'funding_rate', 'datetime']
     with open(filename, 'w', encoding='UTF8') as file:
         writer = csv.writer(file)
         writer.writerow(fr_header)
         writer.writerows(data)
-
-
-async def get_btcdom_index_info(exchange):
-    infos = await exchange.fapiPublic_get_indexinfo()
-    # pprint(infos)
-    btcdom_list = [info for info in infos if info['symbol'] == btcdom_index_symbol]
-    if len(btcdom_list) != 1:
-        raise Exception('cannot find ' + btcdom_index_symbol + 'index')
-    return btcdom_list[0]
 
 
 asyncio.run(run())

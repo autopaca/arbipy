@@ -5,9 +5,11 @@ import os
 from datetime import datetime, timedelta
 import csv
 
-root = os.path.dirname(os.path.abspath(__file__))
-
 import ccxt.async_support as ccxt  # noqa: E402
+
+from utils import get_btcdom_index_info, ts
+
+root = os.path.dirname(os.path.abspath(__file__))
 
 # ccxt unified symbol
 btcdom_symbol = "BTCDOM/USDT"
@@ -70,24 +72,12 @@ async def run():
 
 def write_klines_csv(data, symbol):
     filename = symbol.replace('/', '_') + '_klines.csv'
-    filename = os.path.join(root, 'klines_data', filename)
+    filename = os.path.join(root, '../klines_data', filename)
     klines_header = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
     with open(filename, 'w', encoding='UTF8') as file:
         writer = csv.writer(file)
         writer.writerow(klines_header)
         writer.writerows(data)
-
-
-def ts(dtime):
-    return int(dtime.timestamp() * 1000)
-
-async def get_btcdom_index_info(exchange):
-    infos = await exchange.fapiPublic_get_indexinfo()
-    # pprint(infos)
-    btcdom_list = [info for info in infos if info['symbol'] == btcdom_index_symbol]
-    if len(btcdom_list) != 1:
-        raise Exception('cannot find ' + btcdom_index_symbol + 'index')
-    return btcdom_list[0]
 
 
 asyncio.run(run())

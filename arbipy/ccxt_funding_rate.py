@@ -6,6 +6,8 @@ import sys
 from pprint import pprint
 import functools
 
+from utils import get_btcdom_index_info
+
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root + '/python')
 
@@ -36,13 +38,13 @@ async def run():
 
     # if FR is positive, long position pay short position; negative reversely
     final_fr = btcdom_fr + assets_fr - btc_fr  # short btcDom, short base assets, long btc
-    yearly = final_fr * 3 * 365 / 3  # funding rate is paid every 8 hours, total 3 legs
+    apr = final_fr * 3 * 365 / 3  # funding rate is paid every 8 hours, total 3 legs
     pprint({
         'btcdom_fr': btcdom_fr,
         'assets_fr': assets_fr,
         'btc_fr': btc_fr,
         'final_fr': final_fr,
-        'yearly': yearly,
+        'APR': apr,
         'sample_days': limit / 3
     })
     await exchange.close()
@@ -69,15 +71,6 @@ async def get_fr_infos(exchange, symbol):
     if len(fr_infos) != limit:
         raise Exception('frInfos of ' + symbol + 'length ' + str(len(fr_infos)) + ' != ' + str(limit))
     return fr_infos
-
-
-async def get_btcdom_index_info(exchange):
-    infos = await exchange.fapiPublic_get_indexinfo()
-    # pprint(infos)
-    btcdom_list = [info for info in infos if info['symbol'] == btcdom_index_symbol]
-    if len(btcdom_list) != 1:
-        raise Exception('cannot find ' + btcdom_index_symbol + 'index')
-    return btcdom_list[0]
 
 
 asyncio.run(run())
